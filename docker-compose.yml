@@ -1,0 +1,59 @@
+version: "3.3"
+services:
+
+    weather-app:
+        build:
+            args:
+                user: worker
+                uid: 1000
+            context: ./docker/php
+            dockerfile: Dockerfile
+        container_name: weather-app
+        restart: unless-stopped
+        volumes:
+            - ./:/var/www
+            - ./docker/php/php.ini:/usr/local/etc/php/conf.d/php.ini
+        networks:
+            - weather
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+
+    weather-postgres:
+        image: postgres:14.6
+        container_name: weather-postgres
+        restart: always
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        ports:
+            - ${DB_PORT}:5432
+        environment:
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_DB: ${DB_DATABASE}
+        networks:
+            - weather
+
+    weather-webserver:
+        image: nginx:alpine
+        container_name: weather-webserver
+        restart: unless-stopped
+        ports:
+            - 80:80
+        depends_on:
+            - weather-app
+            - weather-postgres
+        volumes:
+            - ./:/var/www:delegated
+            - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+        networks:
+            - weather
+
+
+
+networks:
+    weather:
+        driver: bridge
+
+volumes:
+    postgres_data:
+        driver: local
