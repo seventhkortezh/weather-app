@@ -3,8 +3,10 @@
 namespace App\Services;
 use App\Helpers\GeocodeHelper;
 use App\Helpers\MapperHelper;
+use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Support\Facades\Http;
 use YaGeo;
+use function PHPUnit\Framework\throwException;
 
 /**
  * Класс сервис для работы с источником погоды
@@ -44,20 +46,39 @@ class WeatherService
 
     public function __construct(string $weatherProvider)
     {
-        $this->name = config('weatherProviders.' . $weatherProvider . '.weatherProviders.name');
+        try {
 
-        $this->api_url = config('weatherProviders.' . $weatherProvider . '.api_url');
-        $this->auth_type = config('weatherProviders.' . $weatherProvider . '.auth_type');
-        $this->request_type = config('weatherProviders.' . $weatherProvider . '.request_type');
-        $this->api_key_title = config('weatherProviders.' . $weatherProvider . '.api_key_title');
-        $this->api_key = config('weatherProviders.' . $weatherProvider . '.api_key');
+            $this->name = config('weatherProviders.' . $weatherProvider . '.name');
 
-        $this->identify_by_city = config('weatherProviders.' . $weatherProvider . '.identify_by_city');
-        $this->param_city_name = config('weatherProviders.' . $weatherProvider . '.param_city_name');
-        $this->param_coord_name = config('weatherProviders.' . $weatherProvider . '.param_coord_name');
+            $this->api_url = config('weatherProviders.' . $weatherProvider . '.api_url');
+            $this->auth_type = config('weatherProviders.' . $weatherProvider . '.auth_type');
+            $this->request_type = config('weatherProviders.' . $weatherProvider . '.request_type');
+            $this->api_key_title = config('weatherProviders.' . $weatherProvider . '.api_key_title');
+            $this->api_key = config('weatherProviders.' . $weatherProvider . '.api_key');
 
-        $this->response_type = config('weatherProviders.' . $weatherProvider . '.response_type');
-        $this->response_map = config('weatherProviders.' . $weatherProvider . '.response_map');
+            $this->identify_by_city = config('weatherProviders.' . $weatherProvider . '.identify_by_city');
+            $this->param_city_name = config('weatherProviders.' . $weatherProvider . '.param_city_name');
+            $this->param_coord_name = config('weatherProviders.' . $weatherProvider . '.param_coord_name');
+
+            $this->response_type = config('weatherProviders.' . $weatherProvider . '.response_type');
+            $this->response_map = config('weatherProviders.' . $weatherProvider . '.response_map');
+
+            $params = get_object_vars($this);
+
+            foreach ($params as $key => $param)
+            {
+                if ( !isset($param) )
+                {
+                    throw new \Exception('Не задан параметр "' . $key . '" для источника "' . $weatherProvider . '"');
+                }
+            }
+
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return false;
+        }
+
     }
 
     /**
@@ -67,7 +88,7 @@ class WeatherService
      */
     public function getTemperatureByCity(string $cityName):string|false
     {
-        \Log::channel('database')->info('$cityName');
+        \Log::channel('database')->info($cityName);
 
         $data = $this->formatRequest($cityName);
         $response = $this->getResponse($data);

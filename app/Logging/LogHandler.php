@@ -4,6 +4,7 @@ namespace App\Logging;
 use App\Events\LogMonologEvent;
 use Monolog\Logger as Monolog;
 use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\Formatter\FormatterInterface;
 use App\Models\Log;
 
 class LogHandler extends AbstractProcessingHandler
@@ -21,5 +22,14 @@ class LogHandler extends AbstractProcessingHandler
     protected function write(array $record):void
     {
         event(new LogMonologEvent($record));
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDefaultFormatter(): FormatterInterface
+    {
+        return new LogFormatter();
     }
 }

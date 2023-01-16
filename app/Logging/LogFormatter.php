@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Logging;
+use Illuminate\Support\Str;
 use Monolog\Formatter\NormalizerFormatter;
 
 class LogFormatter extends NormalizerFormatter
@@ -42,14 +43,11 @@ class LogFormatter extends NormalizerFormatter
         $fills                = $record['extra'];
         $fills['level']       = mb_strtolower($record['level_name']);
         $fills['description'] = $record['message'];
-        $fills['token']       = str_random(30);
+        $fills['token']       = Str::random(30);
         $context              = $record['context'];
-        if (!empty($context))
-        {
-            $fills['type']   = array_has($context, 'type') ? $context['type'] : self::LOG;
-            $fills['result'] = array_has($context, 'result') ? $context['result'] : self::NEUTRAL;
-            $fills           = array_merge($record['context'], $fills);
-        }
+        $fills['type']   = !empty($context['type']) ? $context['type'] : self::LOG;
+        $fills['result'] = !empty($context['result']) ? $context['result'] : self::NEUTRAL;
+        $fills           = array_merge($record['context'], $fills);
         return $fills;
     }
 }
