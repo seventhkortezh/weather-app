@@ -1,0 +1,202 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Weather aggregator",
+        "description": "L5 Swagger OpenApi description",
+        "version": "2.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost/",
+            "description": "Local API server"
+        }
+    ],
+    "paths": {
+        "/api/v1/stats": {
+            "get": {
+                "tags": [
+                    "Статистика"
+                ],
+                "summary": "Статистика запросов погоды по городам",
+                "operationId": "9df00d2e07fda9c380b75483f1d2a637",
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Statistic period (day/month)",
+                        "schema": {
+                            "type": "string",
+                            "example": "month"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/StatResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    }
+                }
+            }
+        },
+        "/api/v1/weather/{city}": {
+            "get": {
+                "tags": [
+                    "Погода"
+                ],
+                "summary": "Информация о погоде из разных источников + средняя по всем",
+                "operationId": "fd265feb56073fc8cad1687b4f96c00a",
+                "parameters": [
+                    {
+                        "name": "city",
+                        "in": "path",
+                        "description": "City code",
+                        "schema": {
+                            "type": "string",
+                            "example": "moscow"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/WeatherResource"
+                                                    }
+                                                },
+                                                "average": {
+                                                    "type": "number",
+                                                    "format": "float"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ErrorMessage": {
+                "title": "ErrorMessage",
+                "properties": {
+                    "message": {
+                        "description": "Описание ошибки",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "SuccessMessage": {
+                "title": "SuccessMessage",
+                "properties": {
+                    "id": {
+                        "description": "Идентификатор",
+                        "type": "integer"
+                    },
+                    "message": {
+                        "description": "Описание успешного действия",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "StatResource": {
+                "properties": {
+                    "city": {
+                        "description": "Наименовение города",
+                        "type": "string"
+                    },
+                    "count": {
+                        "description": "Количество запросов в период",
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "WeatherResource": {
+                "properties": {
+                    "city": {
+                        "description": "Наименовение города",
+                        "type": "string"
+                    },
+                    "source": {
+                        "description": "Наименование источника погоды",
+                        "type": "string"
+                    },
+                    "value": {
+                        "description": "Значение температуры воздуха",
+                        "type": "number",
+                        "format": "float"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "responses": {
+            "NotFound": {
+                "description": "Route not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ErrorMessage"
+                        }
+                    }
+                }
+            },
+            "SuccessNew": {
+                "description": "Successfully created",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/SuccessMessage"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Погода",
+            "description": "Получение информации о погоде"
+        },
+        {
+            "name": "Статистика",
+            "description": "Статистика использования сервиса"
+        }
+    ]
+}

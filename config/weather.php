@@ -4,13 +4,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | API url
+    | Enabled sources
     |--------------------------------------------------------------------------
-    |
-    | URL по которому обращаться к API
+    | Enabled weather sources.
+    | Используемые источники погоды.
     |
     */
 
-    'api_url' => 'https://api.open-meteo.com/v1/forecast?hourly=temperature_2m',
-
+    'enabled_sources' => explode(',', env('WEATHER_SOURCE_ENABLED'))
 ];

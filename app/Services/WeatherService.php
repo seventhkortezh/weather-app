@@ -3,10 +3,8 @@
 namespace App\Services;
 use App\Helpers\GeocodeHelper;
 use App\Helpers\MapperHelper;
-use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Support\Facades\Http;
 use YaGeo;
-use function PHPUnit\Framework\throwException;
 
 /**
  * Класс сервис для работы с источником погоды
@@ -88,8 +86,6 @@ class WeatherService
      */
     public function getTemperatureByCity(string $cityName):string|false
     {
-        \Log::channel('database')->info($cityName);
-
         $data = $this->formatRequest($cityName);
         $response = $this->getResponse($data);
 
